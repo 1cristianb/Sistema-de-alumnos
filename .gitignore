@@ -1,0 +1,32 @@
+# Carpetas de compilación de .NET
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+
+# Carpetas ocultas y configuraciones locales de Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Bases de datos locales
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+universidad.db
+universidad.db-shm
+universidad.db-wal
+
+# Archivos de publicación
+[Pp]ublish/
+[Aa]pp[Pp]ackages/
+
+# configuraciones locales de desarrollo
+appsettings.Development.json
+
+# Logs
+*.log
+logs/

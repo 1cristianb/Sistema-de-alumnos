@@ -1,0 +1,58 @@
+﻿@model Presentacion.Models.LoginViewModel
+@{
+    ViewData["Title"] = "Iniciar sesión";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        @if (TempData["Mensaje"] != null)
+        {
+            <div class="alert alert-success" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Mensaje"]
+            </div>
+        }
+
+        <div class="card p-4">
+            <div class="text-center mb-4">
+                <i class="bi bi-shield-lock-fill text-primary fs-1"></i>
+                <h4 class="fw-bold mt-2 mb-1">Iniciar sesión</h4>
+                <p class="text-muted small mb-0">Ingresá para administrar alumnos y cursos.</p>
+            </div>
+
+            <form asp-action="Login" asp-route-returnUrl="@ViewBag.ReturnUrl" method="post">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger small"></div>
+
+                <div class="mb-3">
+                    <label asp-for="NombreUsuario" class="form-label small fw-semibold"></label>
+                    <input asp-for="NombreUsuario" class="form-control" autofocus />
+                    <span asp-validation-for="NombreUsuario" class="text-danger small"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Password" class="form-label small fw-semibold"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger small"></span>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input asp-for="Recordarme" class="form-check-input" />
+                    <label asp-for="Recordarme" class="form-check-label small"></label>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Entrar
+                    </button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3 small">
+                ¿No tenés cuenta? <a asp-action="Registro">Registrate</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

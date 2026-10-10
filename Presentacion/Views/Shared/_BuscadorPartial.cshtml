@@ -1,0 +1,33 @@
+﻿@model dynamic
+
+<div class="card p-3 mb-4 bg-white">
+    <form asp-controller="Alumno" asp-action="Index" method="get" class="row g-2 align-items-end">
+        <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted">Base de Datos</label>
+            <select name="tipoBD" class="form-select form-select-sm" onchange="this.form.submit()">
+                <option value="Todas" selected="@(ViewBag.TipoBDActual == "Todas")">Todas las bases</option>
+                <option value="LiteDB" selected="@(ViewBag.TipoBDActual == "LiteDB")">LiteDB (Archivo Local)</option>
+                <option value="MongoDB" selected="@(ViewBag.TipoBDActual == "MongoDB")">MongoDB (Servidor)</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <label class="form-label small fw-semibold text-muted">Buscar por DNI</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-card-heading"></i></span>
+                <input type="text" name="buscarDni" value="@ViewBag.BuscarDni" class="form-control" placeholder="Ej: 42123456" />
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label class="form-label small fw-semibold text-muted">Buscar por Apellido</label>
+            <div class="input-group input-group-sm">
+                <span class="input-group-text"><i class="bi bi-search"></i></span>
+                <input type="text" name="buscarApellido" value="@ViewBag.BuscarApellido" class="form-control" placeholder="Ej: Gonzalez" />
+            </div>
+        </div>
+        <div class="col-md-2 d-grid">
+            <button type="submit" class="btn btn-sm btn-outline-dark">
+                <i class="bi bi-funnel-fill me-1"></i> Filtrar
+            </button>
+        </div>
+    </form>
+</div>

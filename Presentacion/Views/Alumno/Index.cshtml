@@ -31,7 +31,7 @@
     }
 }
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
         <h3 class="fw-bold mb-0 text-dark">Alumnos y Cursos Inscriptos</h3>
         <span class="badge bg-secondary">Mostrando: @(tipoActual == "Todas" ? "todas las bases" : tipoActual)</span>
@@ -47,6 +47,17 @@
 <div class="card overflow-hidden">
     <div class="table-responsive">
         <table class="table table-hover align-middle mb-0">
+            <colgroup>
+                <col style="width: 19%;" />
+                <col style="width: 9%;" />
+                <col style="width: 8%;" />
+                <col style="width: 12%;" />
+                <col style="width: 7%;" />
+                <col style="width: 10%;" />
+                <col style="width: 16%;" />
+                <col style="width: 8%;" />
+                <col style="width: 11%;" />
+            </colgroup>
             <thead class="table-light">
                 <tr>
                     <th>Alumno</th>
@@ -54,7 +65,7 @@
                     <th>Base</th>
                     <th>Carrera</th>
                     <th>Puntaje Ingreso</th>
-                    <th>Fecha Nacimiento</th>
+                    <th style="min-width: 7rem; word-break: normal; overflow-wrap: normal;">Fecha Nacimiento</th>
                     <th>Contacto</th>
                     <th>Cursos Asociados</th>
                     <th class="text-end">Acciones</th>
@@ -78,16 +89,22 @@
                             <td>
                                 <span class="badge @(item.BaseDatos == "MongoDB" ? "bg-success" : "bg-info text-dark")">@item.BaseDatos</span>
                             </td>
-                            <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle">@alumno.Carrera</span></td>
+                            <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle text-wrap">@alumno.Carrera</span></td>
                             <td>
                                 <span class="badge @(alumno.PuntajeIngreso >= 700 ? "bg-success" : "bg-warning text-dark")">
                                     @alumno.PuntajeIngreso pts
                                 </span>
                             </td>
-                            <td>@alumno.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                            <td class="text-nowrap">@alumno.FechaNacimiento.ToString("dd/MM/yyyy")</td>
                             <td>
-                                <div><small><i class="bi bi-envelope"></i> @alumno.Email</small></div>
-                                <div><small><i class="bi bi-telephone"></i> @alumno.Telefono</small></div>
+                                <div class="d-flex align-items-start small">
+                                    <i class="bi bi-envelope me-1"></i>
+                                    <span class="text-break">@alumno.Email</span>
+                                </div>
+                                <div class="d-flex align-items-start small mt-1">
+                                    <i class="bi bi-telephone me-1"></i>
+                                    <span>@alumno.Telefono</span>
+                                </div>
                             </td>
                             <td>
                                 <!-- Entidad de relación: cursos reales del alumno -->
@@ -101,7 +118,7 @@
                                           onsubmit="return confirm('¿Quitar el curso @curso.NombreCurso?');">
                                         <input type="hidden" name="id" value="@curso.Id" />
                                         <input type="hidden" name="tipoBD" value="@item.BaseDatos" />
-                                        <span class="badge bg-info text-dark me-1 mb-1">
+                                        <span class="badge bg-info text-dark me-1 mb-1 text-wrap">
                                             <i class="bi bi-journal-code"></i> @curso.NombreCurso
                                             <span class="opacity-75">@curso.Anio</span>
                                             <button type="submit" class="btn-close ms-1" style="font-size:.55em" title="Quitar curso"></button>
@@ -111,11 +128,11 @@
                             </td>
                             <td class="text-end text-nowrap">
                                 <a asp-controller="Curso" asp-action="Alta" asp-route-alumnoId="@alumno.Id" asp-route-tipoBD="@item.BaseDatos"
-                                   class="btn btn-sm btn-outline-success" title="Agregar curso">
+                                   class="btn btn-sm btn-outline-success me-1" title="Agregar curso">
                                     <i class="bi bi-journal-plus"></i>
                                 </a>
                                 <a asp-action="Editar" asp-route-id="@alumno.Id" asp-route-tipoBD="@item.BaseDatos"
-                                   class="btn btn-sm btn-outline-primary" title="Editar">
+                                   class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                                 <form asp-action="Eliminar" method="post" class="d-inline"

@@ -25,6 +25,11 @@ Este proyecto cumple con el objetivo de **comprender cómo consumir bases de dat
 ### 1. MongoDB (Base de Datos Documental)
 Se utiliza el driver oficial `MongoDB.Driver` para .NET. En la capa de datos (`MongoRepository.cs`), la conexión se gestiona instanciando el cliente a través de una cadena de conexión y accediendo a las colecciones de documentos (equivalente a tablas). Es ideal para entornos de producción escalables.
 
+Por practicidad se agrega en este repo un docker-compose.yaml que despliega e inicia un contenedor con mongodb 7.0 instalado y lo expone en localhost:27017.
+Para utilizarla ejecutar:
+```bash
+docker compose -f MongoDB-dc/docker-compose.yaml up -d
+```
 ### 2. LiteDB (Base de Datos Documental Embebida)
 LiteDB es una base de datos NoSQL rápida, liviana y *serverless* (sin servidor) escrita completamente en C#. Todo el almacenamiento se guarda en un único archivo físico (por ejemplo, `universidad.db`). 
 En el proyecto, la implementación se encuentra en `LiteDbRepository.cs` y `LiteDbUsuarioRepository.cs`. 

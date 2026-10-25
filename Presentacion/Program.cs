@@ -1,11 +1,27 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Negocio;
+using Datos;
 using Presentacion.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSingleton<IRepositoryFactory>(serviceProvider =>
+{
+    IConfiguration configuracion =
+        serviceProvider.GetRequiredService<IConfiguration>();
+
+    return new RepositoryFactory(
+        configuracion.ObtenerCadena("MongoDB"),
+        configuracion.ObtenerCadena("LiteDB"));
+});
+
+builder.Services.AddScoped<AlumnoService>();
+builder.Services.AddScoped<CursoService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<DataSeeder>();
 
 // Login con cookies: si alguien no autenticado entra a una página protegida, va a /Account/Login
 builder.Services
@@ -21,11 +37,15 @@ builder.Services
 var app = builder.Build();
 
 // Datos de ejemplo + usuario inicial (solo se cargan si las bases están vacías)
-foreach (var mensaje in DataSeeder.Sembrar(
-             app.Configuration.ObtenerCadena("LiteDB"),
-             app.Configuration.ObtenerCadena("MongoDB")))
+using (IServiceScope scope = app.Services.CreateScope())
 {
-    app.Logger.LogInformation("Seed: {Mensaje}", mensaje);
+    DataSeeder dataSeeder =
+        scope.ServiceProvider.GetRequiredService<DataSeeder>();
+
+    foreach (string mensaje in dataSeeder.Sembrar())
+    {
+        app.Logger.LogInformation("Seed: {Mensaje}", mensaje);
+    }
 }
 
 // Configure the HTTP request pipeline.

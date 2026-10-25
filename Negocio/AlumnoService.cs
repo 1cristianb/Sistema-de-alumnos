@@ -5,10 +5,17 @@ namespace Negocio
 {
     public class AlumnoService
     {
-        public void AltaAlumno(Alumno alumno, string tipoBD, string cadenaConexion)
+        private readonly IRepositoryFactory _repositoryFactory;
+
+        public AlumnoService(IRepositoryFactory repositoryFactory)
+        {
+            _repositoryFactory = repositoryFactory;
+        }
+
+        public void AltaAlumno(Alumno alumno, string tipoBD)
         {
             ValidarFecha(alumno);
-            IAlumnoRepository repo = DatabaseFactory.GetRepository(tipoBD, cadenaConexion);
+            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
 
             if (repo.ListarTodos().Any(a => a.DNI == alumno.DNI))
                 throw new InvalidOperationException($"Ya existe un alumno con el DNI {alumno.DNI} en {tipoBD}.");
@@ -16,19 +23,19 @@ namespace Negocio
             repo.Insertar(alumno);
         }
 
-        public Alumno? ObtenerAlumno(string id, string tipoBD, string cadenaConexion)
+        public Alumno? ObtenerAlumno(string id, string tipoBD)
         {
-            IAlumnoRepository repo = DatabaseFactory.GetRepository(tipoBD, cadenaConexion);
+            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
             return repo.ObtenerPorId(id);
         }
 
-        public void ActualizarAlumno(Alumno alumno, string tipoBD, string cadenaConexion)
+        public void ActualizarAlumno(Alumno alumno, string tipoBD)
         {
             if (string.IsNullOrEmpty(alumno.Id))
                 throw new InvalidOperationException("El alumno no tiene identificador.");
 
             ValidarFecha(alumno);
-            IAlumnoRepository repo = DatabaseFactory.GetRepository(tipoBD, cadenaConexion);
+            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
 
             if (repo.ListarTodos().Any(a => a.DNI == alumno.DNI && a.Id != alumno.Id))
                 throw new InvalidOperationException($"Otro alumno ya tiene el DNI {alumno.DNI} en {tipoBD}.");
@@ -36,23 +43,23 @@ namespace Negocio
             repo.Actualizar(alumno);
         }
 
-        public void EliminarAlumno(string id, string tipoBD, string cadenaConexion)
+        public void EliminarAlumno(string id, string tipoBD)
         {
-            IAlumnoRepository repo = DatabaseFactory.GetRepository(tipoBD, cadenaConexion);
+            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
             repo.Eliminar(id);
         }
 
         // Lista alumnos de TODAS las bases recibidas (tipoBD -> cadena) y aplica el buscador.
         // Si una base falla (ej: MongoDB apagado) no se cae: devuelve igual lo de las otras con una advertencia.
-        public ResultadoListado ListarAlumnos(Dictionary<string, string> bases, string? dni, string? apellido)
+        public ResultadoListado ListarAlumnos(IEnumerable<string> bases, string? dni, string? apellido)
         {
             var resultado = new ResultadoListado();
 
-            foreach (var (tipoBD, cadena) in bases)
+            foreach (string tipoBD in bases)
             {
                 try
                 {
-                    IAlumnoRepository repo = DatabaseFactory.GetRepository(tipoBD, cadena);
+                    IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
                     var cursosPorAlumno = repo.ListarCursos()
                                               .GroupBy(c => c.AlumnoId)
                                               .ToDictionary(g => g.Key, g => g.ToList());

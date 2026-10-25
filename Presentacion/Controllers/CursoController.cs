@@ -9,13 +9,15 @@ namespace Presentacion.Controllers
     [Authorize]
     public class CursoController : Controller
     {
-        private readonly AlumnoService _alumnoService = new AlumnoService();
-        private readonly CursoService _cursoService = new CursoService();
-        private readonly IConfiguration _configuracion;
+        private readonly AlumnoService _alumnoService;
+        private readonly CursoService _cursoService;
 
-        public CursoController(IConfiguration configuracion)
+        public CursoController(
+            AlumnoService alumnoService,
+            CursoService cursoService)
         {
-            _configuracion = configuracion;
+            _alumnoService = alumnoService;
+            _cursoService = cursoService;
         }
 
         // Alta de un curso para un alumno concreto (se identifica por alumnoId + la base donde vive)
@@ -40,7 +42,7 @@ namespace Presentacion.Controllers
 
             try
             {
-                _cursoService.AltaCurso(curso, tipoBD, _configuracion.ObtenerCadena(tipoBD));
+                _cursoService.AltaCurso(curso, tipoBD);
                 TempData["Mensaje"] = $"Curso \"{curso.NombreCurso}\" asociado correctamente al alumno en {tipoBD}.";
                 return RedirectToAction("Index", "Alumno");
             }
@@ -57,7 +59,7 @@ namespace Presentacion.Controllers
         {
             try
             {
-                _cursoService.EliminarCurso(id, tipoBD, _configuracion.ObtenerCadena(tipoBD));
+                _cursoService.EliminarCurso(id, tipoBD);
                 TempData["Mensaje"] = "Curso eliminado.";
             }
             catch (Exception ex)
@@ -72,7 +74,7 @@ namespace Presentacion.Controllers
         {
             try
             {
-                var alumno = _alumnoService.ObtenerAlumno(alumnoId, tipoBD, _configuracion.ObtenerCadena(tipoBD));
+                var alumno = _alumnoService.ObtenerAlumno(alumnoId, tipoBD);
                 if (alumno == null)
                 {
                     TempData["Error"] = "No se encontró el alumno.";

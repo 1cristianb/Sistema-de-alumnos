@@ -4,21 +4,33 @@ using System.Text;
 
 namespace Datos
 {
-    public static class DatabaseFactory
+    public class RepositoryFactory : IRepositoryFactory
     {
-        public static IAlumnoRepository GetRepository(string tipoBD, string cadenaConexion)
+        private readonly string _mongoConnection;
+        private readonly string _liteDbConnection;
+
+        public RepositoryFactory(
+            string mongoConnection,
+            string liteDbConnection)
+        {
+            _mongoConnection = mongoConnection;
+            _liteDbConnection = liteDbConnection;
+        }
+
+        public IAlumnoRepository CrearAlumnoRepository(string tipoBD)
         {
             return tipoBD switch
             {
-                "MongoDB" => new MongoRepository(cadenaConexion),
-                "LiteDB" => new LiteDbRepository(cadenaConexion),
-                _ => throw new ArgumentException("Base de datos no soportada")
+                "MongoDB" => new MongoRepository(_mongoConnection),
+                "LiteDB" => new LiteDbRepository(_liteDbConnection),
+                _ => throw new ArgumentException(
+                    "Base de datos no soportada")
             };
         }
 
-        public static IUsuarioRepository GetUsuarioRepository(string cadenaConexionLiteDb)
+        public IUsuarioRepository CrearUsuarioRepository()
         {
-            return new LiteDbUsuarioRepository(cadenaConexionLiteDb);
+            return new LiteDbUsuarioRepository(_liteDbConnection);
         }
     }
 }

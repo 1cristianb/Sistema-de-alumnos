@@ -8,11 +8,14 @@ namespace Presentacion.Controllers
 {
     public class AlumnoController : Controller
     {
-        private readonly AlumnoService _alumnoService = new AlumnoService();
+        private readonly AlumnoService _alumnoService;
         private readonly IConfiguration _configuracion;
 
-        public AlumnoController(IConfiguration configuracion)
+        public AlumnoController(
+            AlumnoService alumnoService,
+            IConfiguration configuracion)
         {
+            _alumnoService = alumnoService;
             _configuracion = configuracion;
         }
 
@@ -20,7 +23,7 @@ namespace Presentacion.Controllers
         [HttpGet]
         public IActionResult Index(string? buscarDni, string? buscarApellido, string tipoBD = "Todas")
         {
-            var bases = _configuracion.ObtenerBases(tipoBD);
+            var bases = _configuracion.ObtenerBases(tipoBD).Keys;
             var resultado = _alumnoService.ListarAlumnos(bases, buscarDni, buscarApellido);
 
             ViewBag.TipoBDActual = tipoBD;
@@ -49,8 +52,7 @@ namespace Presentacion.Controllers
 
             try
             {
-                string cadena = _configuracion.ObtenerCadena(tipoBD);
-                _alumnoService.AltaAlumno(alumno, tipoBD, cadena);
+                _alumnoService.AltaAlumno(alumno, tipoBD);
                 TempData["Mensaje"] = $"Alumno {alumno.Nombre} {alumno.Apellido} registrado correctamente en {tipoBD}.";
                 return RedirectToAction("Index");
             }
@@ -66,7 +68,7 @@ namespace Presentacion.Controllers
         {
             try
             {
-                var alumno = _alumnoService.ObtenerAlumno(id, tipoBD, _configuracion.ObtenerCadena(tipoBD));
+                var alumno = _alumnoService.ObtenerAlumno(id, tipoBD);
                 if (alumno == null)
                 {
                     TempData["Error"] = "No se encontró el alumno.";
@@ -94,7 +96,7 @@ namespace Presentacion.Controllers
 
             try
             {
-                _alumnoService.ActualizarAlumno(alumno, tipoBD, _configuracion.ObtenerCadena(tipoBD));
+                _alumnoService.ActualizarAlumno(alumno, tipoBD);
                 TempData["Mensaje"] = $"Alumno {alumno.Nombre} {alumno.Apellido} actualizado correctamente en {tipoBD}.";
                 return RedirectToAction("Index");
             }
@@ -111,7 +113,7 @@ namespace Presentacion.Controllers
         {
             try
             {
-                _alumnoService.EliminarAlumno(id, tipoBD, _configuracion.ObtenerCadena(tipoBD));
+                _alumnoService.EliminarAlumno(id, tipoBD);
                 TempData["Mensaje"] = $"Alumno eliminado de {tipoBD} junto con sus cursos.";
             }
             catch (Exception ex)

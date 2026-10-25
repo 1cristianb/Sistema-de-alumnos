@@ -6,19 +6,29 @@ using System.Text;
 
 namespace Negocio
 {
-    public static class DataSeeder
+    public class DataSeeder
     {
         private const string Ingenieria = "Ingeniería en Informática";
         private const string Gestion = "Licenciatura en Gestión de la Tecnología";
         private const string TecWeb = "Tecnicatura Universitaria en Web";
+        private readonly IRepositoryFactory _repositoryFactory;
+        private readonly UsuarioService _usuarioService;
 
-        public static List<string> Sembrar(string cadenaLiteDb, string cadenaMongo)
+        public DataSeeder(
+            IRepositoryFactory repositoryFactory,
+            UsuarioService usuarioService)
+        {
+            _repositoryFactory = repositoryFactory;
+            _usuarioService = usuarioService;
+        }
+
+        public List<string> Sembrar()
         {
             var log = new List<string>();
 
             try
             {
-                if (new UsuarioService().CrearUsuarioInicial(cadenaLiteDb))
+                if (_usuarioService.CrearUsuarioInicial())
                     log.Add("Usuario inicial creado: admin / admin123");
             }
             catch (Exception ex)
@@ -26,16 +36,16 @@ namespace Negocio
                 log.Add($"No se pudo crear el usuario inicial: {ex.Message}");
             }
 
-            SembrarAlumnos("LiteDB", cadenaLiteDb, AlumnosLiteDb(), log);
-            SembrarAlumnos("MongoDB", cadenaMongo, AlumnosMongo(), log);
+            SembrarAlumnos("LiteDB", AlumnosLiteDb(), log);
+            SembrarAlumnos("MongoDB", AlumnosMongo(), log);
             return log;
         }
 
-        private static void SembrarAlumnos(string tipoBD, string cadena, List<(Alumno, List<Curso>)> datos, List<string> log)
+        private void SembrarAlumnos(string tipoBD, List<(Alumno, List<Curso>)> datos, List<string> log)
         {
             try
             {
-                IAlumnoRepository repo = DatabaseFactory.GetRepository(tipoBD, cadena);
+                IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
 
                 if (repo.ListarTodos().Count > 0)
                 {

@@ -13,9 +13,16 @@ namespace Negocio
         private const int TamanoSalt = 16;
         private const int TamanoHash = 32;
 
-        public void Registrar(string nombreUsuario, string password, string cadenaLiteDb)
+        private readonly IRepositoryFactory _repositoryFactory;
+
+        public UsuarioService(IRepositoryFactory repositoryFactory)
         {
-            var repo = DatabaseFactory.GetUsuarioRepository(cadenaLiteDb);
+            _repositoryFactory = repositoryFactory;
+        }
+
+        public void Registrar(string nombreUsuario, string password)
+        {
+            var repo = _repositoryFactory.CrearUsuarioRepository();
             string nombre = Normalizar(nombreUsuario);
 
             if (repo.ObtenerPorNombre(nombre) != null)
@@ -25,9 +32,9 @@ namespace Negocio
         }
 
         // Devuelve el usuario si las credenciales son correctas; null si no.
-        public Usuario? Autenticar(string nombreUsuario, string password, string cadenaLiteDb)
+        public Usuario? Autenticar(string nombreUsuario, string password)
         {
-            var repo = DatabaseFactory.GetUsuarioRepository(cadenaLiteDb);
+            var repo = _repositoryFactory.CrearUsuarioRepository();
             var usuario = repo.ObtenerPorNombre(Normalizar(nombreUsuario));
 
             if (usuario == null || !Verificar(password, usuario.PasswordHash))
@@ -37,9 +44,9 @@ namespace Negocio
         }
 
         // Crea admin / admin123 si todavía no hay usuarios. Devuelve true si lo creó.
-        public bool CrearUsuarioInicial(string cadenaLiteDb)
+        public bool CrearUsuarioInicial()
         {
-            var repo = DatabaseFactory.GetUsuarioRepository(cadenaLiteDb);
+            var repo = _repositoryFactory.CrearUsuarioRepository();
             if (repo.Contar() > 0) return false;
 
             repo.Insertar(new Usuario { NombreUsuario = "admin", PasswordHash = Hashear("admin123") });

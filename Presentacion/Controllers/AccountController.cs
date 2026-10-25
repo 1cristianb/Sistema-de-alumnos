@@ -11,12 +11,11 @@ namespace Presentacion.Controllers
 {
     public class AccountController : Controller
     {
-        private readonly UsuarioService _usuarioService = new UsuarioService();
-        private readonly IConfiguration _configuracion;
+        private readonly UsuarioService _usuarioService;
 
-        public AccountController(IConfiguration configuracion)
+        public AccountController(UsuarioService usuarioService)
         {
-            _configuracion = configuracion;
+            _usuarioService = usuarioService;
         }
 
         [HttpGet, AllowAnonymous]
@@ -39,7 +38,7 @@ namespace Presentacion.Controllers
 
             try
             {
-                var usuario = _usuarioService.Autenticar(model.NombreUsuario, model.Password, _configuracion.ObtenerCadena("LiteDB"));
+                var usuario = _usuarioService.Autenticar(model.NombreUsuario, model.Password);
 
                 if (usuario == null)
                 {
@@ -85,7 +84,7 @@ namespace Presentacion.Controllers
 
             try
             {
-                _usuarioService.Registrar(model.NombreUsuario, model.Password, _configuracion.ObtenerCadena("LiteDB"));
+                _usuarioService.Registrar(model.NombreUsuario, model.Password);
                 TempData["Mensaje"] = "Usuario creado. Ya podés iniciar sesión.";
                 return RedirectToAction("Login");
             }

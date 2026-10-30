@@ -35,6 +35,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public IActionResult Alta()
         {
             ViewBag.TipoBD = "LiteDB";
@@ -42,6 +43,7 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
+        [Authorize]
         [ValidateAntiForgeryToken]
         public IActionResult Alta(Alumno alumno, string tipoBD)
         {

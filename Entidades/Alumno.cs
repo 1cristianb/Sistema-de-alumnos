@@ -16,6 +16,10 @@ namespace Entidades
         public string Apellido { get; set; }
 
         [Required(ErrorMessage = "El DNI es obligatorio")]
+        [StringLength(8, MinimumLength = 7,
+        ErrorMessage = "El DNI debe tener entre 7 y 8 dígitos")]
+        [RegularExpression(@"^[0-9]+$",
+        ErrorMessage = "El DNI solo debe contener números")]
         public string DNI { get; set; }
 
         [Required(ErrorMessage = "El legajo es obligatorio")]

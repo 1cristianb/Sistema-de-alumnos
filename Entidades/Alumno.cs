@@ -10,9 +10,19 @@ namespace Entidades
         public string? Id { get; set; }
 
         [Required(ErrorMessage = "El nombre es obligatorio")]
+        [StringLength(50, MinimumLength = 2,
+        ErrorMessage = "El nombre debe tener entre 2 y 50 caracteres")]
+        [RegularExpression(
+        @"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+([ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$",
+        ErrorMessage = "El nombre solo puede contener letras, espacios, apóstrofes y guiones")]
         public string Nombre { get; set; }
 
         [Required(ErrorMessage = "El apellido es obligatorio")]
+        [StringLength(50, MinimumLength = 2,
+        ErrorMessage = "El apellido debe tener entre 2 y 50 caracteres")]
+        [RegularExpression(
+         @"^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+([ '-][A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$",
+        ErrorMessage = "El apellido solo puede contener letras, espacios, apóstrofes y guiones")]
         public string Apellido { get; set; }
 
         [Required(ErrorMessage = "El DNI es obligatorio")]

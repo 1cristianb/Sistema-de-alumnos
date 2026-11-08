@@ -14,7 +14,7 @@ El sistema está estructurado bajo una **Arquitectura de N-Capas** para garantiz
 
 1. **Presentación (`/Presentacion`):** Interfaz de usuario desarrollada con ASP.NET Core MVC. Incluye controladores (`AlumnoController.cs`, `CursoController.cs`, `AccountController.cs`), vistas con Layout (`_Layout.cshtml`), y vistas parciales (`_BuscadorPartial.cshtml`, `_FormAlumno.cshtml`)
 2. **Negocio (`/Negocio`):** Contiene la lógica principal de la aplicación mediante servicios (`AlumnoService.cs`, `CursoService.cs`, `UsuarioService.cs`)
-3. **Datos (`/Datos`):** Capa de acceso a datos que implementa el patrón Repository mediante interfaces (`IAlumnoRepository.cs`, `IUsuarioRepository.cs`). Utiliza un `DataBaseFactory.cs` para orquestar y decidir la conexión a las distintas bases de datos NoSQL.
+3. **Datos (`/Datos`):** Capa de acceso a datos que implementa el patrón Repository mediante interfaces (`IAlumnoRepository.cs`, `IUsuarioRepository.cs`) y una fábrica (`RepositoryFactory.cs` / `IRepositoryFactory.cs`) que decide qué implementación NoSQL (MongoDB o LiteDB) se instancia.
 4. **Entidades (`/Entidades`):** Clases y modelos de dominio que transitan por todas las capas (`Alumno.cs`, `Curso.cs`, `Usuario.cs`)
 ---
 
@@ -45,4 +45,4 @@ using (var db = new LiteDatabase(@"Datos\universidad.db"))
 }
 ```
 • > [!TIP]
-Nota de Arquitectura: La clase DataBaseFactory.cs actúa como orquestador. Dependiendo de la configuración seleccionada (por ejemplo, desde el appsettings.json), la factoría inyectará la implementación de MongoRepository o LiteDbRepository en los servicios de la capa de Negocio, demostrando una arquitectura flexible e independiente del motor de base de datos.
+Nota de Arquitectura: La clase `RepositoryFactory.cs` actúa como orquestador. Dependiendo del motor elegido, la factoría inyecta la implementación `MongoRepository` o `LiteDbRepository` en los servicios de la capa de Negocio, demostrando una arquitectura flexible e independiente del motor de base de datos. El `MongoClient` se crea una sola vez y se reutiliza.

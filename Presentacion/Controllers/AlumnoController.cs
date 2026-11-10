@@ -6,122 +6,118 @@ using Presentacion.Helpers;
 
 namespace Presentacion.Controllers
 {
-    // Todo el ABM exige sesión iniciada; el login/registro queda anónimo en AccountController.
     [Authorize]
     public class AlumnoController : Controller
     {
         private readonly AlumnoService _alumnoService;
-        private readonly IConfiguration _configuracion;
 
-        public AlumnoController(
-            AlumnoService alumnoService,
-            IConfiguration configuracion)
+        public AlumnoController(AlumnoService alumnoService)
         {
             _alumnoService = alumnoService;
-            _configuracion = configuracion;
         }
 
-        // Listado: por defecto muestra los alumnos de AMBAS bases; el combo filtra por base.
         [HttpGet]
-        public IActionResult Index(string? buscarDni, string? buscarApellido, string tipoBD = "Todas")
+        public IActionResult Index(
+            string? buscarDni,
+            string? buscarApellido)
         {
-            var bases = _configuracion.ObtenerBases(tipoBD).Keys;
-            var resultado = _alumnoService.ListarAlumnos(bases, buscarDni, buscarApellido);
+            List<AlumnoListadoItem> alumnos =
+                _alumnoService.ListarAlumnos(
+                    buscarDni,
+                    buscarApellido);
 
-            ViewBag.TipoBDActual = tipoBD;
             ViewBag.BuscarDni = buscarDni;
             ViewBag.BuscarApellido = buscarApellido;
-            ViewBag.Advertencias = resultado.Advertencias;
 
-            return View(resultado.Items);
+            return View(alumnos);
         }
 
         [HttpGet]
         public IActionResult Alta()
         {
-            ViewBag.TipoBD = "LiteDB";
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Alta(Alumno alumno, string tipoBD)
+        public IActionResult Alta(Alumno alumno)
         {
-            ViewBag.TipoBD = tipoBD;
-
             if (!ModelState.IsValid)
                 return View(alumno);
 
             try
             {
-                _alumnoService.AltaAlumno(alumno, tipoBD);
-                TempData["Mensaje"] = $"Alumno {alumno.Nombre} {alumno.Apellido} registrado correctamente en {tipoBD}.";
+                _alumnoService.AltaAlumno(alumno);
+                TempData["Mensaje"] =
+                    $"Alumno {alumno.Nombre} {alumno.Apellido} registrado correctamente.";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Ocurrió un error: " + Errores.Describir(ex, tipoBD);
+                ViewBag.Error =
+                    "Ocurrió un error: " + Errores.Describir(ex);
                 return View(alumno);
             }
         }
 
         [HttpGet]
-        public IActionResult Editar(string id, string tipoBD)
+        public IActionResult Editar(string id)
         {
             try
             {
-                var alumno = _alumnoService.ObtenerAlumno(id, tipoBD);
+                Alumno? alumno = _alumnoService.ObtenerAlumno(id);
                 if (alumno == null)
                 {
                     TempData["Error"] = "No se encontró el alumno.";
                     return RedirectToAction("Index");
                 }
 
-                ViewBag.TipoBD = tipoBD;
                 return View(alumno);
             }
             catch (Exception ex)
             {
-                TempData["Error"] = Errores.Describir(ex, tipoBD);
+                TempData["Error"] = Errores.Describir(ex);
                 return RedirectToAction("Index");
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Editar(Alumno alumno, string tipoBD)
+        public IActionResult Editar(Alumno alumno)
         {
-            ViewBag.TipoBD = tipoBD;
-
             if (!ModelState.IsValid)
                 return View(alumno);
 
             try
             {
-                _alumnoService.ActualizarAlumno(alumno, tipoBD);
-                TempData["Mensaje"] = $"Alumno {alumno.Nombre} {alumno.Apellido} actualizado correctamente en {tipoBD}.";
+                _alumnoService.ActualizarAlumno(alumno);
+                TempData["Mensaje"] =
+                    $"Alumno {alumno.Nombre} {alumno.Apellido} actualizado correctamente.";
                 return RedirectToAction("Index");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Ocurrió un error: " + Errores.Describir(ex, tipoBD);
+                ViewBag.Error =
+                    "Ocurrió un error: " + Errores.Describir(ex);
                 return View(alumno);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Eliminar(string id, string tipoBD)
+        public IActionResult Eliminar(string id)
         {
             try
             {
-                _alumnoService.EliminarAlumno(id, tipoBD);
-                TempData["Mensaje"] = $"Alumno eliminado de {tipoBD} junto con sus cursos.";
+                _alumnoService.EliminarAlumno(id);
+                TempData["Mensaje"] =
+                    "Alumno eliminado junto con sus cursos.";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = Errores.Describir(ex, tipoBD);
+                TempData["Error"] = Errores.Describir(ex);
             }
+
             return RedirectToAction("Index");
         }
     }

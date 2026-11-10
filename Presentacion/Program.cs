@@ -1,25 +1,42 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Negocio;
 using Datos;
-using Presentacion.Helpers;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddSingleton<IRepositoryFactory>(serviceProvider =>
-{
-    IConfiguration configuracion =
-        serviceProvider.GetRequiredService<IConfiguration>();
+string mongoConnection =
+    builder.Configuration.GetConnectionString("MongoDbConnection")
+    ?? throw new InvalidOperationException(
+        "No se configuró MongoDbConnection");
 
-    return new RepositoryFactory(
-        configuracion.ObtenerCadena("MongoDB"),
-        configuracion.ObtenerCadena("LiteDB"));
-});
+string mongoDatabaseName =
+    builder.Configuration["MongoDb:DatabaseName"]
+    ?? throw new InvalidOperationException(
+        "No se configuró MongoDb:DatabaseName");
 
+builder.Services.AddSingleton<IMongoClient>(
+    new MongoClient(mongoConnection));
+
+builder.Services.AddDbContext<UniversidadDbContext>(
+    (serviceProvider, options) =>
+    {
+        IMongoClient mongoClient =
+            serviceProvider.GetRequiredService<IMongoClient>();
+
+        options.UseMongoDB(
+            mongoClient,
+            mongoDatabaseName);
+    });
+
+builder.Services.AddScoped<IAlumnoRepository, EfMongoRepository>();
 builder.Services.AddScoped<AlumnoService>();
 builder.Services.AddScoped<CursoService>();
+builder.Services.AddScoped<IUsuarioRepository, EfUsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<DataSeeder>();
 
@@ -36,7 +53,7 @@ builder.Services
 
 var app = builder.Build();
 
-// Datos de ejemplo + usuario inicial (solo se cargan si las bases están vacías)
+// Datos de ejemplo + usuario inicial (solo se cargan si la base está vacía)
 using (IServiceScope scope = app.Services.CreateScope())
 {
     DataSeeder dataSeeder =

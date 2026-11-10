@@ -1,5 +1,6 @@
 <Solution>
   <Project Path="Datos/Datos.csproj" />
+  <Project Path="Datos.IntegrationTests/Datos.IntegrationTests.csproj" />
   <Project Path="Entidades/Entidades.csproj" />
   <Project Path="Negocio/Negocio.csproj" />
   <Project Path="Presentacion/Presentacion.csproj" />

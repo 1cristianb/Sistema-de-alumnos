@@ -1,6 +1,6 @@
 ﻿using Entidades;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Negocio;
 using Presentacion.Helpers;
 
@@ -20,21 +20,24 @@ namespace Presentacion.Controllers
             _cursoService = cursoService;
         }
 
-        // Alta de un curso para un alumno concreto (se identifica por alumnoId + la base donde vive)
         [HttpGet]
-        public IActionResult Alta(string alumnoId, string tipoBD)
+        public IActionResult Alta(string alumnoId)
         {
-            if (!CargarAlumno(alumnoId, tipoBD))
+            if (!CargarAlumno(alumnoId))
                 return RedirectToAction("Index", "Alumno");
 
-            return View(new Curso { AlumnoId = alumnoId, Anio = DateTime.Now.Year });
+            return View(new Curso
+            {
+                AlumnoId = alumnoId,
+                Anio = DateTime.Now.Year
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Alta(Curso curso, string tipoBD)
+        public IActionResult Alta(Curso curso)
         {
-            if (!CargarAlumno(curso.AlumnoId, tipoBD))
+            if (!CargarAlumno(curso.AlumnoId))
                 return RedirectToAction("Index", "Alumno");
 
             if (!ModelState.IsValid)
@@ -42,39 +45,41 @@ namespace Presentacion.Controllers
 
             try
             {
-                _cursoService.AltaCurso(curso, tipoBD);
-                TempData["Mensaje"] = $"Curso \"{curso.NombreCurso}\" asociado correctamente al alumno en {tipoBD}.";
+                _cursoService.AltaCurso(curso);
+                TempData["Mensaje"] =
+                    $"Curso \"{curso.NombreCurso}\" asociado correctamente al alumno.";
                 return RedirectToAction("Index", "Alumno");
             }
             catch (Exception ex)
             {
-                ViewBag.Error = "Ocurrió un error: " + Errores.Describir(ex, tipoBD);
+                ViewBag.Error =
+                    "Ocurrió un error: " + Errores.Describir(ex);
                 return View(curso);
             }
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Eliminar(string id, string tipoBD)
+        public IActionResult Eliminar(string id)
         {
             try
             {
-                _cursoService.EliminarCurso(id, tipoBD);
+                _cursoService.EliminarCurso(id);
                 TempData["Mensaje"] = "Curso eliminado.";
             }
             catch (Exception ex)
             {
-                TempData["Error"] = Errores.Describir(ex, tipoBD);
+                TempData["Error"] = Errores.Describir(ex);
             }
+
             return RedirectToAction("Index", "Alumno");
         }
 
-        // Carga el alumno en ViewBag para mostrar a quién se le agrega el curso
-        private bool CargarAlumno(string alumnoId, string tipoBD)
+        private bool CargarAlumno(string alumnoId)
         {
             try
             {
-                var alumno = _alumnoService.ObtenerAlumno(alumnoId, tipoBD);
+                Alumno? alumno = _alumnoService.ObtenerAlumno(alumnoId);
                 if (alumno == null)
                 {
                     TempData["Error"] = "No se encontró el alumno.";
@@ -82,12 +87,11 @@ namespace Presentacion.Controllers
                 }
 
                 ViewBag.Alumno = alumno;
-                ViewBag.TipoBD = tipoBD;
                 return true;
             }
             catch (Exception ex)
             {
-                TempData["Error"] = Errores.Describir(ex, tipoBD);
+                TempData["Error"] = Errores.Describir(ex);
                 return false;
             }
         }

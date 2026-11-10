@@ -1,7 +1,6 @@
 ﻿@model Entidades.Alumno
 @{
     ViewData["Title"] = "Registro de Nuevo Alumno";
-    string tipoSeleccionado = ViewBag.TipoBD ?? "LiteDB";
 }
 
 <div class="row justify-content-center">
@@ -26,23 +25,6 @@
 
             <form asp-action="Alta" method="post">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
-
-                <!-- Selector de Base de Datos NoSQL -->
-                <div class="alert alert-light border d-flex flex-wrap align-items-center justify-content-between gap-3 p-3 mb-4">
-                    <div class="d-flex align-items-center">
-                        <i class="bi bi-database-fill-gear fs-4 text-primary me-3"></i>
-                        <div>
-                            <div class="fw-semibold">Motor de Persistencia NoSQL</div>
-                            <small class="text-muted">Elige en qué motor NoSQL deseas guardar este registro</small>
-                        </div>
-                    </div>
-                    <div style="min-width: 200px;">
-                        <select name="tipoBD" class="form-select">
-                            <option value="LiteDB" selected="@(tipoSeleccionado == "LiteDB")">LiteDB (Local .db)</option>
-                            <option value="MongoDB" selected="@(tipoSeleccionado == "MongoDB")">MongoDB (Documentos)</option>
-                        </select>
-                    </div>
-                </div>
 
                 <partial name="_FormAlumno" />
 

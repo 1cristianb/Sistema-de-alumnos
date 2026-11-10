@@ -6,6 +6,8 @@ using Presentacion.Helpers;
 
 namespace Presentacion.Controllers
 {
+    // Todo el ABM exige sesión iniciada; el login/registro queda anónimo en AccountController.
+    [Authorize]
     public class AlumnoController : Controller
     {
         private readonly AlumnoService _alumnoService;
@@ -35,7 +37,6 @@ namespace Presentacion.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public IActionResult Alta()
         {
             ViewBag.TipoBD = "LiteDB";
@@ -43,7 +44,6 @@ namespace Presentacion.Controllers
         }
 
         [HttpPost]
-        [Authorize]
         [ValidateAntiForgeryToken]
         public IActionResult Alta(Alumno alumno, string tipoBD)
         {

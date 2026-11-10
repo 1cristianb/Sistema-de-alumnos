@@ -11,9 +11,9 @@ namespace Datos
         private readonly IMongoCollection<Alumno> _alumnos;
         private readonly IMongoCollection<Curso> _cursos;
 
-        public MongoRepository(string connectionString)
+        // El MongoClient es thread-safe y debe reutilizarse (lo administra la fábrica).
+        public MongoRepository(IMongoClient client)
         {
-            var client = new MongoClient(connectionString);
             var database = client.GetDatabase("UniversidadDB");
             _alumnos = database.GetCollection<Alumno>("Alumnos");
             _cursos = database.GetCollection<Curso>("Cursos");

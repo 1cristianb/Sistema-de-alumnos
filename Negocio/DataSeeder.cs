@@ -92,16 +92,16 @@ namespace Negocio
 
         private static List<(Alumno, List<Curso>)> AlumnosMongo() => new()
         {
-            Crear("Sofía", "Martínez", "43111222", "M-2001", Gestion, new DateTime(2003, 5, 18), 780,
+            Crear("Sofía", "Martínez", "43111222", "L-2001", Gestion, new DateTime(2003, 5, 18), 780,
                   "sofia.martinez@alumno.unlam.edu.ar", "11 4411-5064", "Illia 1200, González Catán",
                   ("Programación Avanzada II", 2026), ("Gestión de Proyectos", 2026)),
-            Crear("Joaquín", "Ramírez", "42222333", "M-2002", Ingenieria, new DateTime(2002, 9, 9), 650,
+            Crear("Joaquín", "Ramírez", "42222333", "L-2002", Ingenieria, new DateTime(2002, 9, 9), 650,
                   "joaquin.ramirez@alumno.unlam.edu.ar", "11 5522-6075", "Brown 90, San Justo",
                   ("Bases de Datos", 2026)),
-            Crear("Valentina", "Sosa", "41333444", "M-2003", TecWeb, new DateTime(2001, 12, 1), 890,
+            Crear("Valentina", "Sosa", "41333444", "L-2003", TecWeb, new DateTime(2001, 12, 1), 890,
                   "valentina.sosa@alumno.unlam.edu.ar", "11 4433-7086", "Belgrano 410, Morón",
                   ("Diseño Web", 2026), ("Programación Avanzada II", 2026)),
-            Crear("Tomás", "Acosta", "40444555", "M-2004", Ingenieria, new DateTime(2000, 4, 27), 430,
+            Crear("Tomás", "Acosta", "40444555", "L-2004", Ingenieria, new DateTime(2000, 4, 27), 430,
                   "tomas.acosta@alumno.unlam.edu.ar", "11 6644-8097", "Salta 2300, Laferrere")
         };
 

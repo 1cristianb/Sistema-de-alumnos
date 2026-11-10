@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MongoDB.Driver;
+using System;
 using System.Collections.Generic;
 using System.Text;
 
@@ -6,14 +7,14 @@ namespace Datos
 {
     public class RepositoryFactory : IRepositoryFactory
     {
-        private readonly string _mongoConnection;
+        private readonly MongoClient _mongoClient;
         private readonly string _liteDbConnection;
 
         public RepositoryFactory(
             string mongoConnection,
             string liteDbConnection)
         {
-            _mongoConnection = mongoConnection;
+            _mongoClient = new MongoClient(mongoConnection);
             _liteDbConnection = liteDbConnection;
         }
 
@@ -21,7 +22,7 @@ namespace Datos
         {
             return tipoBD switch
             {
-                "MongoDB" => new MongoRepository(_mongoConnection),
+                "MongoDB" => new MongoRepository(_mongoClient),
                 "LiteDB" => new LiteDbRepository(_liteDbConnection),
                 _ => throw new ArgumentException(
                     "Base de datos no soportada")

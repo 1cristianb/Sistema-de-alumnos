@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Negocio;
 using Datos;
-using Presentacion.Helpers;
 using Microsoft.EntityFrameworkCore;
 using MongoDB.Driver;
 
@@ -34,16 +33,6 @@ builder.Services.AddDbContext<UniversidadDbContext>(
             mongoDatabaseName);
     });
 
-builder.Services.AddSingleton<IRepositoryFactory>(serviceProvider =>
-{
-    IConfiguration configuracion =
-        serviceProvider.GetRequiredService<IConfiguration>();
-
-    return new RepositoryFactory(
-        configuracion.ObtenerCadena("MongoDB"),
-        configuracion.ObtenerCadena("LiteDB"));
-});
-
 builder.Services.AddScoped<IAlumnoRepository, EfMongoRepository>();
 builder.Services.AddScoped<AlumnoService>();
 builder.Services.AddScoped<CursoService>();
@@ -64,7 +53,7 @@ builder.Services
 
 var app = builder.Build();
 
-// Datos de ejemplo + usuario inicial (solo se cargan si las bases están vacías)
+// Datos de ejemplo + usuario inicial (solo se cargan si la base está vacía)
 using (IServiceScope scope = app.Services.CreateScope())
 {
     DataSeeder dataSeeder =

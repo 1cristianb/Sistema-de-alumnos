@@ -1,48 +1,61 @@
-# Sistema de Gestión de Alumnos - UNLAM
+# Sistema de Gestión de Alumnos - UNLaM
 
-Este proyecto fue desarrollado como Trabajo Práctico para la materia **Programación Avanzada II** de la Licenciatura en Gestión Tecnológica (Universidad Nacional de La Matanza - DIIT)
+Trabajo práctico de **Programación Avanzada II** desarrollado con ASP.NET Core MVC y .NET 10.
 
-El sistema consiste en una aplicación web desarrollada con **ASP.NET Core MVC** que permite la administración completa (ABM) de una entidad principal (`Alumno`) y una entidad de relación (`Curso`), implementando además un sistema de autenticación (Login).
+La aplicación permite:
 
-El enfoque técnico principal de este proyecto es demostrar el **acceso a bases de datos NoSQL desde .NET**, consumiendo dos motores de bases de datos NoSQL distintos (MongoDB y LiteDB) en la misma solución.
+- Registrar, listar, buscar, editar y eliminar alumnos.
+- Asociar y eliminar cursos de un alumno.
+- Registrar usuarios e iniciar sesión mediante autenticación por cookies.
+- Persistir alumnos, cursos y usuarios en MongoDB mediante Entity Framework Core.
 
----
+## Arquitectura
 
-## 🚀 Arquitectura del Proyecto
+La solución está organizada en capas:
 
-El sistema está estructurado bajo una **Arquitectura de N-Capas** para garantizar el bajo acoplamiento y la alta cohesión, permitiendo la comunicación mediante el intercambio de objetos
+1. **Presentación (`Presentacion`)**: controladores y vistas Razor de ASP.NET Core MVC.
+2. **Negocio (`Negocio`)**: servicios y reglas de negocio.
+3. **Datos (`Datos`)**: `UniversidadDbContext` y repositorios implementados con Entity Framework Core.
+4. **Entidades (`Entidades`)**: clases de dominio y modelos utilizados entre las capas.
 
-1. **Presentación (`/Presentacion`):** Interfaz de usuario desarrollada con ASP.NET Core MVC. Incluye controladores (`AlumnoController.cs`, `CursoController.cs`, `AccountController.cs`), vistas con Layout (`_Layout.cshtml`), y vistas parciales (`_BuscadorPartial.cshtml`, `_FormAlumno.cshtml`)
-2. **Negocio (`/Negocio`):** Contiene la lógica principal de la aplicación mediante servicios (`AlumnoService.cs`, `CursoService.cs`, `UsuarioService.cs`)
-3. **Datos (`/Datos`):** Capa de acceso a datos que implementa el patrón Repository mediante interfaces (`IAlumnoRepository.cs`, `IUsuarioRepository.cs`) y una fábrica (`RepositoryFactory.cs` / `IRepositoryFactory.cs`) que decide qué implementación NoSQL (MongoDB o LiteDB) se instancia.
-4. **Entidades (`/Entidades`):** Clases y modelos de dominio que transitan por todas las capas (`Alumno.cs`, `Curso.cs`, `Usuario.cs`)
----
+Los servicios reciben las interfaces `IAlumnoRepository` e `IUsuarioRepository` mediante inyección de dependencias. Las implementaciones concretas se registran en `Program.cs`.
 
-## 🗄️ Acceso a Bases de Datos NoSQL
+## Persistencia
 
-Este proyecto cumple con el objetivo de **comprender cómo consumir bases de datos NoSQL utilizando proyectos .NET**. Para ello, la aplicación consume **dos bases de datos NoSQL distintas**:
+Se utiliza una única base MongoDB llamada `UniversidadDB`, con estas colecciones:
 
-### 1. MongoDB (Base de Datos Documental)
-Se utiliza el driver oficial `MongoDB.Driver` para .NET. En la capa de datos (`MongoRepository.cs`), la conexión se gestiona instanciando el cliente a través de una cadena de conexión y accediendo a las colecciones de documentos (equivalente a tablas). Es ideal para entornos de producción escalables.
+- `Alumnos`
+- `Cursos`
+- `Usuarios`
 
-Por practicidad se agrega en este repo un docker-compose.yaml que despliega e inicia un contenedor con mongodb 7.0 instalado y lo expone en localhost:27017.
-Para utilizarla ejecutar:
+El acceso se implementa con el proveedor oficial `MongoDB.EntityFrameworkCore`. La cadena de conexión y el nombre de la base se configuran en `Presentacion/appsettings.json`.
+
+## Requisitos
+
+- SDK de .NET 10.
+- Docker con Docker Compose, o una instancia de MongoDB disponible en `localhost:27017`.
+
+## Ejecución
+
+Desde la raíz del proyecto:
+
 ```bash
 docker compose -f MongoDB-dc/docker-compose.yaml up -d
+dotnet restore
+dotnet run --project Presentacion
 ```
-### 2. LiteDB (Base de Datos Documental Embebida)
-LiteDB es una base de datos NoSQL rápida, liviana y *serverless* (sin servidor) escrita completamente en C#. Todo el almacenamiento se guarda en un único archivo físico (por ejemplo, `universidad.db`). 
-En el proyecto, la implementación se encuentra en `LiteDbRepository.cs` y `LiteDbUsuarioRepository.cs`. 
 
-**Ejemplo de uso de LiteDB en el código:**
-```csharp
-// El acceso se realiza mapeando las clases (POCOs) directamente a BSON documents
-using (var db = new LiteDatabase(@"Datos\universidad.db"))
-{
-    var alumnosCollection = db.GetCollection<Alumno>("Alumnos");
-    // Al insertar, LiteDB genera automáticamente un ObjectId o utiliza el Id definido
-    alumnosCollection.Insert(nuevoAlumno); 
-}
+La URL local se muestra en la salida de `dotnet run`. Con la configuración incluida normalmente es:
+
+```text
+http://localhost:5260
 ```
-• > [!TIP]
-Nota de Arquitectura: La clase `RepositoryFactory.cs` actúa como orquestador. Dependiendo del motor elegido, la factoría inyecta la implementación `MongoRepository` o `LiteDbRepository` en los servicios de la capa de Negocio, demostrando una arquitectura flexible e independiente del motor de base de datos. El `MongoClient` se crea una sola vez y se reutiliza.
+
+Si la colección de usuarios está vacía, el sistema crea este usuario inicial:
+
+```text
+Usuario: admin
+Contraseña: admin123
+```
+
+El usuario inicial es únicamente para uso local y académico.

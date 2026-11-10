@@ -7,7 +7,7 @@ namespace Entidades
 {
     public class Alumno
     {
-        // Clave generada por el motor NoSQL (MongoDB/LiteDB); no se exige en el alta.
+        // Clave generada al persistir el documento; no se exige en el alta.
         public string? Id { get; set; }
 
         [Required(ErrorMessage = "El nombre es obligatorio")]

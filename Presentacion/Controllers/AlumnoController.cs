@@ -55,7 +55,7 @@ namespace Presentacion.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error =
-                    "Ocurrió un error: " + Errores.Describir(ex, "MongoDB");
+                    "Ocurrió un error: " + Errores.Describir(ex);
                 return View(alumno);
             }
         }
@@ -76,7 +76,7 @@ namespace Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = Errores.Describir(ex, "MongoDB");
+                TempData["Error"] = Errores.Describir(ex);
                 return RedirectToAction("Index");
             }
         }
@@ -98,7 +98,7 @@ namespace Presentacion.Controllers
             catch (Exception ex)
             {
                 ViewBag.Error =
-                    "Ocurrió un error: " + Errores.Describir(ex, "MongoDB");
+                    "Ocurrió un error: " + Errores.Describir(ex);
                 return View(alumno);
             }
         }
@@ -115,7 +115,7 @@ namespace Presentacion.Controllers
             }
             catch (Exception ex)
             {
-                TempData["Error"] = Errores.Describir(ex, "MongoDB");
+                TempData["Error"] = Errores.Describir(ex);
             }
 
             return RedirectToAction("Index");

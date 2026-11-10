@@ -59,3 +59,19 @@ Contraseña: admin123
 ```
 
 El usuario inicial es únicamente para uso local y académico.
+
+## Pruebas de integración
+
+Las pruebas de `Datos.IntegrationTests` verifican el acceso a MongoDB mediante Entity Framework Core y requieren que MongoDB esté disponible.
+
+Cada prueba utiliza una base temporal independiente y la elimina al finalizar. No modifica `UniversidadDB`.
+
+```bash
+dotnet test
+```
+
+Por defecto se conectan a `mongodb://localhost:27017`. Para utilizar otra instancia:
+
+```bash
+MONGODB_TEST_CONNECTION="mongodb://servidor:27017" dotnet test
+```

@@ -43,11 +43,9 @@ public class EfMongoRepository : IAlumnoRepository
 
     public void Eliminar(string id)
     {
-        List<Curso> cursos = _context.Cursos
+        _context.Cursos
             .Where(curso => curso.AlumnoId == id)
-            .ToList();
-
-        _context.Cursos.RemoveRange(cursos);
+            .ExecuteDelete();
 
         Alumno? alumno = _context.Alumnos
             .FirstOrDefault(alumno => alumno.Id == id);
@@ -55,9 +53,8 @@ public class EfMongoRepository : IAlumnoRepository
         if (alumno != null)
         {
             _context.Alumnos.Remove(alumno);
+            _context.SaveChanges();
         }
-
-        _context.SaveChanges();
     }
 
     public void InsertarCurso(Curso curso)

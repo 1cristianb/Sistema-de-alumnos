@@ -5,108 +5,99 @@ namespace Negocio
 {
     public class AlumnoService
     {
-        private readonly IRepositoryFactory _repositoryFactory;
+        private readonly IAlumnoRepository _repository;
 
-        public AlumnoService(IRepositoryFactory repositoryFactory)
+        public AlumnoService(IAlumnoRepository repository)
         {
-            _repositoryFactory = repositoryFactory;
+            _repository = repository;
         }
 
-        public void AltaAlumno(Alumno alumno, string tipoBD)
+        public void AltaAlumno(Alumno alumno)
         {
             ValidarFecha(alumno);
-            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
 
-            if (repo.ListarTodos().Any(a => a.DNI == alumno.DNI))
-                throw new InvalidOperationException($"Ya existe un alumno con el DNI {alumno.DNI} en {tipoBD}.");
+            if (_repository.ListarTodos().Any(a => a.DNI == alumno.DNI))
+                throw new InvalidOperationException(
+                    $"Ya existe un alumno con el DNI {alumno.DNI}.");
 
-            repo.Insertar(alumno);
+            _repository.Insertar(alumno);
         }
 
-        public Alumno? ObtenerAlumno(string id, string tipoBD)
+        public Alumno? ObtenerAlumno(string id)
         {
-            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
-            return repo.ObtenerPorId(id);
+            return _repository.ObtenerPorId(id);
         }
 
-        public void ActualizarAlumno(Alumno alumno, string tipoBD)
+        public void ActualizarAlumno(Alumno alumno)
         {
             if (string.IsNullOrEmpty(alumno.Id))
-                throw new InvalidOperationException("El alumno no tiene identificador.");
+                throw new InvalidOperationException(
+                    "El alumno no tiene identificador.");
 
             ValidarFecha(alumno);
-            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
 
-            if (repo.ListarTodos().Any(a => a.DNI == alumno.DNI && a.Id != alumno.Id))
-                throw new InvalidOperationException($"Otro alumno ya tiene el DNI {alumno.DNI} en {tipoBD}.");
-
-            repo.Actualizar(alumno);
-        }
-
-        public void EliminarAlumno(string id, string tipoBD)
-        {
-            IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
-            repo.Eliminar(id);
-        }
-
-        // Lista alumnos de TODAS las bases recibidas (tipoBD -> cadena) y aplica el buscador.
-        // Si una base falla (ej: MongoDB apagado) no se cae: devuelve igual lo de las otras con una advertencia.
-        public ResultadoListado ListarAlumnos(IEnumerable<string> bases, string? dni, string? apellido)
-        {
-            var resultado = new ResultadoListado();
-
-            foreach (string tipoBD in bases)
+            if (_repository.ListarTodos()
+                .Any(a => a.DNI == alumno.DNI && a.Id != alumno.Id))
             {
-                try
-                {
-                    IAlumnoRepository repo = _repositoryFactory.CrearAlumnoRepository(tipoBD);
-                    var cursosPorAlumno = repo.ListarCursos()
-                                              .GroupBy(c => c.AlumnoId)
-                                              .ToDictionary(g => g.Key, g => g.ToList());
-
-                    foreach (var alumno in repo.ListarTodos())
-                    {
-                        resultado.Items.Add(new AlumnoListadoItem
-                        {
-                            Alumno = alumno,
-                            BaseDatos = tipoBD,
-                            Cursos = alumno.Id != null && cursosPorAlumno.TryGetValue(alumno.Id, out var cursos)
-                                        ? cursos
-                                        : new List<Curso>()
-                        });
-                    }
-                }
-                catch (TimeoutException)
-                {
-                    resultado.Advertencias.Add($"No se pudo conectar a {tipoBD}. Verificá que el servidor esté corriendo.");
-                }
-                catch (Exception ex)
-                {
-                    resultado.Advertencias.Add($"Error al leer {tipoBD}: {ex.Message}");
-                }
+                throw new InvalidOperationException(
+                    $"Otro alumno ya tiene el DNI {alumno.DNI}.");
             }
 
-            IEnumerable<AlumnoListadoItem> filtrados = resultado.Items;
+            _repository.Actualizar(alumno);
+        }
+
+        public void EliminarAlumno(string id)
+        {
+            _repository.Eliminar(id);
+        }
+
+        public List<AlumnoListadoItem> ListarAlumnos(
+            string? dni,
+            string? apellido)
+        {
+            Dictionary<string, List<Curso>> cursosPorAlumno =
+                _repository.ListarCursos()
+                    .GroupBy(curso => curso.AlumnoId)
+                    .ToDictionary(grupo => grupo.Key, grupo => grupo.ToList());
+
+            IEnumerable<AlumnoListadoItem> resultado =
+                _repository.ListarTodos().Select(alumno =>
+                    new AlumnoListadoItem
+                    {
+                        Alumno = alumno,
+                        Cursos = alumno.Id != null &&
+                                  cursosPorAlumno.TryGetValue(
+                                      alumno.Id,
+                                      out List<Curso>? cursos)
+                            ? cursos
+                            : new List<Curso>()
+                    });
 
             if (!string.IsNullOrWhiteSpace(dni))
-                filtrados = filtrados.Where(i => i.Alumno.DNI != null && i.Alumno.DNI.Contains(dni.Trim()));
+            {
+                resultado = resultado.Where(item =>
+                    item.Alumno.DNI.Contains(dni.Trim()));
+            }
 
             if (!string.IsNullOrWhiteSpace(apellido))
-                filtrados = filtrados.Where(i => i.Alumno.Apellido != null &&
-                                                 i.Alumno.Apellido.Contains(apellido.Trim(), StringComparison.OrdinalIgnoreCase));
+            {
+                resultado = resultado.Where(item =>
+                    item.Alumno.Apellido.Contains(
+                        apellido.Trim(),
+                        StringComparison.OrdinalIgnoreCase));
+            }
 
-            resultado.Items = filtrados
-                .OrderBy(i => i.Alumno.Apellido)
-                .ThenBy(i => i.Alumno.Nombre)
+            return resultado
+                .OrderBy(item => item.Alumno.Apellido)
+                .ThenBy(item => item.Alumno.Nombre)
                 .ToList();
-
-            return resultado;
         }
 
         private static void ValidarFecha(Alumno alumno)
         {
             if (alumno.FechaNacimiento > DateTime.Now)
-                throw new InvalidOperationException("La fecha de nacimiento no puede ser del futuro.");
+                throw new InvalidOperationException(
+                    "La fecha de nacimiento no puede ser del futuro.");
         }
     }
 }

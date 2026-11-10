@@ -1,30 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Datos;
+﻿using Datos;
 using Entidades;
 
 namespace Negocio
 {
     public class CursoService
     {
-        private readonly IRepositoryFactory _repositoryFactory;
+        private readonly IAlumnoRepository _repository;
 
-        public CursoService(IRepositoryFactory repositoryFactory)
+        public CursoService(IAlumnoRepository repository)
         {
-            _repositoryFactory = repositoryFactory;
+            _repository = repository;
         }
 
-        public void AltaCurso(Curso curso, string tipoBD)
+        public void AltaCurso(Curso curso)
         {
-            IAlumnoRepository repo =
-                _repositoryFactory.CrearAlumnoRepository(tipoBD);
-
-            if (repo.ObtenerPorId(curso.AlumnoId) == null)
+            if (_repository.ObtenerPorId(curso.AlumnoId) == null)
                 throw new InvalidOperationException(
-                    $"El alumno indicado no existe en {tipoBD}.");
+                    "El alumno indicado no existe.");
 
-            bool repetido = repo.ListarCursos().Any(c =>
+            bool repetido = _repository.ListarCursos().Any(c =>
                 c.AlumnoId == curso.AlumnoId &&
                 c.Anio == curso.Anio &&
                 string.Equals(
@@ -36,15 +30,12 @@ namespace Negocio
                 throw new InvalidOperationException(
                     "El alumno ya está inscripto en ese curso para ese año.");
 
-            repo.InsertarCurso(curso);
+            _repository.InsertarCurso(curso);
         }
 
-        public void EliminarCurso(string cursoId, string tipoBD)
+        public void EliminarCurso(string cursoId)
         {
-            IAlumnoRepository repo =
-                _repositoryFactory.CrearAlumnoRepository(tipoBD);
-
-            repo.EliminarCurso(cursoId);
+            _repository.EliminarCurso(cursoId);
         }
     }
 }

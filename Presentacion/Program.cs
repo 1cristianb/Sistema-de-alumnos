@@ -44,7 +44,7 @@ builder.Services.AddSingleton<IRepositoryFactory>(serviceProvider =>
         configuracion.ObtenerCadena("LiteDB"));
 });
 
-//builder.Services.AddScoped<IAlumnoRepository, EfMongoRepository>();
+builder.Services.AddScoped<IAlumnoRepository, EfMongoRepository>();
 builder.Services.AddScoped<AlumnoService>();
 builder.Services.AddScoped<CursoService>();
 builder.Services.AddScoped<IUsuarioRepository, EfUsuarioRepository>();

@@ -1,8 +1,6 @@
 ﻿@model List<Entidades.AlumnoListadoItem>
 @{
     ViewData["Title"] = "Listado General de Alumnos";
-    string tipoActual = ViewBag.TipoBDActual ?? "Todas";
-    var advertencias = ViewBag.Advertencias as List<string>;
 }
 
 @if (TempData["Mensaje"] != null)
@@ -21,20 +19,9 @@
     </div>
 }
 
-@if (advertencias != null)
-{
-    foreach (var advertencia in advertencias)
-    {
-        <div class="alert alert-warning mb-3" role="alert">
-            <i class="bi bi-database-exclamation me-2"></i>@advertencia
-        </div>
-    }
-}
-
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
     <div>
         <h3 class="fw-bold mb-0 text-dark">Alumnos y Cursos Inscriptos</h3>
-        <span class="badge bg-secondary">Mostrando: @(tipoActual == "Todas" ? "todas las bases" : tipoActual)</span>
         <span class="badge bg-light text-dark border">@Model.Count alumno(s)</span>
     </div>
     <a asp-action="Alta" class="btn btn-success shadow-sm">
@@ -50,7 +37,6 @@
             <colgroup>
                 <col style="width: 19%;" />
                 <col style="width: 9%;" />
-                <col style="width: 8%;" />
                 <col style="width: 12%;" />
                 <col style="width: 7%;" />
                 <col style="width: 10%;" />
@@ -62,7 +48,6 @@
                 <tr>
                     <th>Alumno</th>
                     <th>DNI / Legajo</th>
-                    <th>Base</th>
                     <th>Carrera</th>
                     <th>Puntaje Ingreso</th>
                     <th style="min-width: 7rem; word-break: normal; overflow-wrap: normal;">Fecha Nacimiento</th>
@@ -85,9 +70,6 @@
                             <td>
                                 <span class="badge bg-light text-dark border">@alumno.DNI</span>
                                 <div><small class="text-muted">@alumno.Legajo</small></div>
-                            </td>
-                            <td>
-                                <span class="badge @(item.BaseDatos == "MongoDB" ? "bg-success" : "bg-info text-dark")">@item.BaseDatos</span>
                             </td>
                             <td><span class="badge bg-primary-subtle text-primary border border-primary-subtle text-wrap">@alumno.Carrera</span></td>
                             <td>
@@ -117,7 +99,6 @@
                                     <form asp-controller="Curso" asp-action="Eliminar" method="post" class="d-inline"
                                           onsubmit="return confirm('¿Quitar el curso @curso.NombreCurso?');">
                                         <input type="hidden" name="id" value="@curso.Id" />
-                                        <input type="hidden" name="tipoBD" value="@item.BaseDatos" />
                                         <span class="badge bg-info text-dark me-1 mb-1 text-wrap">
                                             <i class="bi bi-journal-code"></i> @curso.NombreCurso
                                             <span class="opacity-75">@curso.Anio</span>
@@ -127,18 +108,17 @@
                                 }
                             </td>
                             <td class="text-end text-nowrap">
-                                <a asp-controller="Curso" asp-action="Alta" asp-route-alumnoId="@alumno.Id" asp-route-tipoBD="@item.BaseDatos"
+                                <a asp-controller="Curso" asp-action="Alta" asp-route-alumnoId="@alumno.Id"
                                    class="btn btn-sm btn-outline-success me-1" title="Agregar curso">
                                     <i class="bi bi-journal-plus"></i>
                                 </a>
-                                <a asp-action="Editar" asp-route-id="@alumno.Id" asp-route-tipoBD="@item.BaseDatos"
+                                <a asp-action="Editar" asp-route-id="@alumno.Id"
                                    class="btn btn-sm btn-outline-primary me-1" title="Editar">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                                 <form asp-action="Eliminar" method="post" class="d-inline"
                                       onsubmit="return confirm('¿Eliminar a @alumno.Nombre @alumno.Apellido y todos sus cursos?');">
                                     <input type="hidden" name="id" value="@alumno.Id" />
-                                    <input type="hidden" name="tipoBD" value="@item.BaseDatos" />
                                     <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
                                         <i class="bi bi-trash"></i>
                                     </button>
@@ -150,7 +130,7 @@
                 else
                 {
                     <tr>
-                        <td colspan="9" class="text-center py-5 text-muted">
+                        <td colspan="8" class="text-center py-5 text-muted">
                             <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                             No se encontraron alumnos con los filtros elegidos.
                         </td>

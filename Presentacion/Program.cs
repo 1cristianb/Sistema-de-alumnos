@@ -2,11 +2,37 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Negocio;
 using Datos;
 using Presentacion.Helpers;
+using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+string mongoConnection =
+    builder.Configuration.GetConnectionString("MongoDbConnection")
+    ?? throw new InvalidOperationException(
+        "No se configuró MongoDbConnection");
+
+string mongoDatabaseName =
+    builder.Configuration["MongoDb:DatabaseName"]
+    ?? throw new InvalidOperationException(
+        "No se configuró MongoDb:DatabaseName");
+
+builder.Services.AddSingleton<IMongoClient>(
+    new MongoClient(mongoConnection));
+
+builder.Services.AddDbContext<UniversidadDbContext>(
+    (serviceProvider, options) =>
+    {
+        IMongoClient mongoClient =
+            serviceProvider.GetRequiredService<IMongoClient>();
+
+        options.UseMongoDB(
+            mongoClient,
+            mongoDatabaseName);
+    });
 
 builder.Services.AddSingleton<IRepositoryFactory>(serviceProvider =>
 {
@@ -18,8 +44,10 @@ builder.Services.AddSingleton<IRepositoryFactory>(serviceProvider =>
         configuracion.ObtenerCadena("LiteDB"));
 });
 
+//builder.Services.AddScoped<IAlumnoRepository, EfMongoRepository>();
 builder.Services.AddScoped<AlumnoService>();
 builder.Services.AddScoped<CursoService>();
+builder.Services.AddScoped<IUsuarioRepository, EfUsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<DataSeeder>();
 

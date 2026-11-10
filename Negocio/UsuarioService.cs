@@ -13,29 +13,27 @@ namespace Negocio
         private const int TamanoSalt = 16;
         private const int TamanoHash = 32;
 
-        private readonly IRepositoryFactory _repositoryFactory;
+        private readonly IUsuarioRepository _repository;
 
-        public UsuarioService(IRepositoryFactory repositoryFactory)
+        public UsuarioService(IUsuarioRepository repository)
         {
-            _repositoryFactory = repositoryFactory;
+            _repository = repository;
         }
 
         public void Registrar(string nombreUsuario, string password)
         {
-            var repo = _repositoryFactory.CrearUsuarioRepository();
             string nombre = Normalizar(nombreUsuario);
 
-            if (repo.ObtenerPorNombre(nombre) != null)
+            if (_repository.ObtenerPorNombre(nombre) != null)
                 throw new InvalidOperationException("Ese nombre de usuario ya está en uso.");
 
-            repo.Insertar(new Usuario { NombreUsuario = nombre, PasswordHash = Hashear(password) });
+            _repository.Insertar(new Usuario { NombreUsuario = nombre, PasswordHash = Hashear(password) });
         }
 
         // Devuelve el usuario si las credenciales son correctas; null si no.
         public Usuario? Autenticar(string nombreUsuario, string password)
         {
-            var repo = _repositoryFactory.CrearUsuarioRepository();
-            var usuario = repo.ObtenerPorNombre(Normalizar(nombreUsuario));
+            var usuario = _repository.ObtenerPorNombre(Normalizar(nombreUsuario));
 
             if (usuario == null || !Verificar(password, usuario.PasswordHash))
                 return null;
@@ -46,10 +44,9 @@ namespace Negocio
         // Crea admin / admin123 si todavía no hay usuarios. Devuelve true si lo creó.
         public bool CrearUsuarioInicial()
         {
-            var repo = _repositoryFactory.CrearUsuarioRepository();
-            if (repo.Contar() > 0) return false;
+            if (_repository.Contar() > 0) return false;
 
-            repo.Insertar(new Usuario { NombreUsuario = "admin", PasswordHash = Hashear("admin123") });
+            _repository.Insertar(new Usuario { NombreUsuario = "admin", PasswordHash = Hashear("admin123") });
             return true;
         }
 

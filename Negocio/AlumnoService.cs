@@ -16,11 +16,23 @@ namespace Negocio
         {
             ValidarFecha(alumno);
 
-            if (_repository.ListarTodos().Any(a => a.DNI == alumno.DNI))
+            List<Alumno> alumnos = _repository.ListarTodos();
+
+            if (alumnos.Any(a => a.DNI == alumno.DNI))
                 throw new InvalidOperationException(
                     $"Ya existe un alumno con el DNI {alumno.DNI}.");
 
+            if (TieneLegajoDuplicado(alumnos, alumno))
+                throw new InvalidOperationException(
+                    $"Ya existe un alumno con el legajo {alumno.Legajo}.");
+
+            if (TieneEmailDuplicado(alumnos, alumno))
+                throw new InvalidOperationException(
+                    $"Ya existe un alumno con el email {alumno.Email}.");
+
             _repository.Insertar(alumno);
+
+
         }
 
         public Alumno? ObtenerAlumno(string id)
@@ -36,12 +48,22 @@ namespace Negocio
 
             ValidarFecha(alumno);
 
-            if (_repository.ListarTodos()
-                .Any(a => a.DNI == alumno.DNI && a.Id != alumno.Id))
+            List<Alumno> alumnos = _repository.ListarTodos();
+
+            if (alumnos.Any(a =>
+                a.DNI == alumno.DNI && a.Id != alumno.Id))
             {
                 throw new InvalidOperationException(
                     $"Otro alumno ya tiene el DNI {alumno.DNI}.");
             }
+
+            if (TieneLegajoDuplicado(alumnos, alumno))
+                throw new InvalidOperationException(
+                    $"Otro alumno ya tiene el legajo {alumno.Legajo}.");
+
+            if (TieneEmailDuplicado(alumnos, alumno))
+                throw new InvalidOperationException(
+                    $"Otro alumno ya tiene el email {alumno.Email}.");
 
             _repository.Actualizar(alumno);
         }
@@ -99,5 +121,37 @@ namespace Negocio
                 throw new InvalidOperationException(
                     "La fecha de nacimiento no puede ser del futuro.");
         }
+
+        private static bool TieneLegajoDuplicado(
+        List<Alumno> alumnos,
+        Alumno alumno)
+        {
+            if (string.IsNullOrWhiteSpace(alumno.Legajo))
+                return false;
+
+            return alumnos.Any(existente =>
+                existente.Id != alumno.Id &&
+                string.Equals(
+                    existente.Legajo?.Trim(),
+                    alumno.Legajo.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+        }
+
+        // Comprueba si otro alumno ya utiliza el mismo email.
+        private static bool TieneEmailDuplicado(
+            List<Alumno> alumnos,
+            Alumno alumno)
+        {
+            if (string.IsNullOrWhiteSpace(alumno.Email))
+                return false;
+
+            return alumnos.Any(existente =>
+                existente.Id != alumno.Id &&
+                string.Equals(
+                    existente.Email?.Trim(),
+                    alumno.Email.Trim(),
+                    StringComparison.OrdinalIgnoreCase));
+        }
     }
 }
+    

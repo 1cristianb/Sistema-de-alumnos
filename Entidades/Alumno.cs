@@ -44,7 +44,10 @@ namespace Entidades
 
         [Required(ErrorMessage = "El teléfono es obligatorio")]
         [StringLength(30, MinimumLength = 6,
-        ErrorMessage = "El teléfono debe tener entre 6 y 30 caracteres")]
+      ErrorMessage = "El teléfono debe tener entre 6 y 30 caracteres")]
+        [RegularExpression(
+      @"^(?=.*[0-9])[0-9+() -]+$",
+      ErrorMessage = "El teléfono solo puede contener números, espacios, guiones, paréntesis y el signo +")]
         public string Telefono { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "La dirección es obligatoria")]
